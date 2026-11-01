@@ -27,6 +27,16 @@ export async function generateImageWithFlux(prompt: string, seed?: number): Prom
     clearTimeout(timeoutId);
 
     if (!res.ok) {
+      if (res.status === 402) {
+        const errorJson = await res.json().catch(() => ({}));
+        const rawMsg = errorJson?.error?.message || '';
+        const match = rawMsg.match(/Retry after (\d+)s/i);
+        const retrySeconds = match ? parseInt(match[1], 10) : 45;
+        const rateLimitErr: any = new Error(`RATE_LIMIT_COOLDOWN:${retrySeconds}`);
+        rateLimitErr.retrySeconds = retrySeconds;
+        rateLimitErr.rawMessage = rawMsg;
+        throw rateLimitErr;
+      }
       throw new Error(`FLUX Engine returned status ${res.status}: ${res.statusText}`);
     }
 

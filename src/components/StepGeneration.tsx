@@ -154,18 +154,33 @@ export const StepGeneration: React.FC<StepGenerationProps> = ({
           </div>
         </div>
 
-        {hasFallbackSticker && (
-          <div className="bg-amber-50/90 border border-amber-200/90 rounded-2xl p-4 text-xs text-amber-900 flex items-start gap-3">
-            <Sparkles className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-            <div className="space-y-1">
+        {imageEngine === 'flux' ? (
+          <div className="bg-emerald-50/80 border border-emerald-200 rounded-2xl p-3.5 text-xs text-emerald-950 flex items-start gap-2.5">
+            <span className="text-base">⚡</span>
+            <div className="space-y-0.5">
               <p className="font-bold flex items-center gap-2">
-                <span>เชื่อมต่อโมเดล:</span>
-                <span className="font-mono text-[11px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded border border-amber-300 font-semibold">
+                <span>โหมดฟรี: FLUX.1 AI Engine</span>
+                <span className="text-[10px] bg-emerald-600 text-white font-bold px-2 py-0.2 rounded-full">
+                  Free Public Queue
+                </span>
+              </p>
+              <p className="text-emerald-800 text-[11px] leading-relaxed">
+                เซิร์ฟเวอร์ฟรีจำกัดคิว 1 รูปทุกๆ 45 วินาที ระบบจะสร้างรูปแรกทันที และนับเวลาถอยหลังเพื่อสร้างรูปถัดไปให้อัตโนมัติ (หรือคลิกปุ่ม &quot;สร้างรูปนี้ทันที&quot; บนการ์ดที่ต้องการได้เลย)
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-blue-50/80 border border-blue-200 rounded-2xl p-3.5 text-xs text-blue-950 flex items-start gap-2.5">
+            <Sparkles className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <p className="font-bold flex items-center gap-2">
+                <span>โหมด Google AI Studio:</span>
+                <span className="font-mono text-[11px] bg-blue-100 text-blue-900 px-2 py-0.5 rounded border border-blue-300 font-semibold">
                   gemini-2.5-flash-image (Nano Banana)
                 </span>
               </p>
-              <p className="text-amber-800 leading-relaxed">
-                ระบบได้ส่งคำสั่งไปยัง <strong>gemini-2.5-flash-image</strong> ผ่าน Google AI Studio Interactions เรียบร้อยแล้ว แต่เนื่องจากบัญชี Free Tier กำหนดโควต้าสร้างภาพเป็น <code>0/0 RPD</code> ระบบจึงสลับมาใช้ภาพตัวอย่างพร้อมขอบขาวไดคัทและข้อความไทยให้คุณทดสอบฟังก์ชันได้ครบ 100% หากต้องการให้ AI วาดภาพจริง ให้คลิกปุ่ม <strong>"Set up billing"</strong> ที่มุมบนซ้ายในหน้า <a href="https://aistudio.google.com/" target="_blank" rel="noreferrer" className="underline font-bold text-amber-950 hover:text-black">Google AI Studio</a> ครับ
+              <p className="text-blue-800 text-[11px] leading-relaxed">
+                สร้างภาพด้วยโมเดลความเร็วสูงของ Google AI Studio โดยตรง (หากยังไม่เคยเปิด Billing ให้คลิก &quot;Set up billing&quot; ในหน้า AI Studio เพื่อรับสิทธิ์เจนภาพฟรี $300)
               </p>
             </div>
           </div>

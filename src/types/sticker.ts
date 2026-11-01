@@ -51,7 +51,8 @@ export interface StickerItem {
   emotionKey: string;
   textBubble: string;
   prompt: string;
-  status: 'idle' | 'generating' | 'generated' | 'processing' | 'ready' | 'error';
+  status: 'idle' | 'generating' | 'generated' | 'processing' | 'ready' | 'cooldown' | 'error';
+  cooldownSeconds?: number;
   rawImageUrl?: string; // base64 or URL with white background
   transparentImageUrl?: string; // base64 PNG with transparent background and optional white stroke/text
   thumbnailUrl?: string; // scaled for preview

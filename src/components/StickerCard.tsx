@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { RefreshCw, CheckCircle2, AlertCircle, Eye, Sparkles, Type } from 'lucide-react';
+import { RefreshCw, CheckCircle2, AlertCircle, Eye, Sparkles, Type, Clock, Play } from 'lucide-react';
 import { StickerItem } from '@/types/sticker';
 
 interface StickerCardProps {
@@ -61,6 +61,12 @@ export const StickerCard: React.FC<StickerCardProps> = ({
                 : 'Gemini AI'}
             </span>
           )}
+          {sticker.status === 'cooldown' && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-300 animate-pulse">
+              <Clock className="w-3 h-3 text-amber-600" />
+              รอคิว {sticker.cooldownSeconds || 45}s
+            </span>
+          )}
           {isGenerating && (
             <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200 animate-pulse">
               <div className="w-2.5 h-2.5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
@@ -97,7 +103,24 @@ export const StickerCard: React.FC<StickerCardProps> = ({
           />
         ) : (
           <div className="text-center p-4">
-            {isGenerating ? (
+            {sticker.status === 'cooldown' ? (
+              <div className="space-y-2 text-center">
+                <div className="w-9 h-9 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-black text-sm mx-auto animate-bounce">
+                  ⏳
+                </div>
+                <p className="text-xs font-bold text-amber-800">
+                  รอคิวเซิร์ฟเวอร์ฟรี
+                </p>
+                <div className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100/90 rounded-full text-amber-900 font-mono font-bold text-xs border border-amber-300/60">
+                  <span>เหลืออีก</span>
+                  <span className="text-amber-700 font-black text-sm">{sticker.cooldownSeconds || 45}</span>
+                  <span>วินาที</span>
+                </div>
+                <p className="text-[10px] text-gray-400">
+                  ระบบจะสร้างภาพ AI ให้อัตโนมัติเมื่อครบเวลา
+                </p>
+              </div>
+            ) : isGenerating ? (
               <div className="space-y-2">
                 <div className="w-8 h-8 border-3 border-line border-t-transparent rounded-full animate-spin mx-auto" />
                 <p className="text-[11px] text-gray-500 font-medium">Generating with AI...</p>
@@ -116,9 +139,16 @@ export const StickerCard: React.FC<StickerCardProps> = ({
                 </button>
               </div>
             ) : (
-              <div className="text-gray-300 space-y-1">
-                <Sparkles className="w-8 h-8 mx-auto stroke-1" />
+              <div className="space-y-2 text-center">
+                <Sparkles className="w-8 h-8 mx-auto text-gray-300 stroke-1" />
                 <p className="text-[11px] font-medium text-gray-400">Waiting for generation</p>
+                <button
+                  onClick={() => onRegenerate(sticker.id)}
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-line bg-line/10 hover:bg-line hover:text-white px-2.5 py-1 rounded-lg transition border border-line/20"
+                >
+                  <Play className="w-3 h-3 fill-current" />
+                  <span>สร้างรูปนี้ทันที</span>
+                </button>
               </div>
             )}
           </div>

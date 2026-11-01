@@ -138,7 +138,9 @@ export default function Home() {
     );
   };
 
-  // Step 2 & 3: Generate images and post-process backgrounds with White Stroke & Typography
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  // Step 2 & 3: Generate images with Smart Rate-Limit Queue & post-process for LINE specs
   const handleStartGeneration = async () => {
     setCurrentStep('generation');
     setIsGeneratingImages(true);
@@ -147,88 +149,111 @@ export default function Home() {
 
     for (let i = 0; i < updatedStickers.length; i++) {
       const current = updatedStickers[i];
+      let success = false;
+      let attempts = 0;
 
-      setStickers((prev) =>
-        prev.map((s) => (s.id === current.id ? { ...s, status: 'generating' } : s))
-      );
-
-      try {
-        const genRes = await fetch('/api/generate-image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt: current.prompt,
-            id: current.id,
-            filename: current.filename,
-            label: current.label,
-            textBubble: current.textBubble,
-            emotionKey: current.emotionKey,
-            engine: config.imageEngine,
-          }),
-        });
-
-        if (!genRes.ok) {
-          const errJson = await genRes.json().catch(() => ({}));
-          throw new Error(errJson.error || 'Image generation failed');
-        }
-
-        const genData = await genRes.json();
-        const rawBase64 = genData.imageBase64;
-
+      while (!success && attempts < 3) {
+        attempts++;
         setStickers((prev) =>
-          prev.map((s) =>
-            s.id === current.id
-              ? { ...s, status: 'processing', rawImageUrl: rawBase64 }
-              : s
-          )
+          prev.map((s) => (s.id === current.id ? { ...s, status: 'generating', error: undefined } : s))
         );
 
-        // Process with White Stroke & Text Overlay
-        const procRes = await fetch('/api/process-image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            imageBase64: rawBase64,
-            type: 'sticker',
-            threshold: 240,
-            strokeThickness: config.whiteStrokeThickness,
-            textOverlay: current.textOverlay,
-          }),
-        });
+        try {
+          const genRes = await fetch('/api/generate-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              prompt: current.prompt,
+              id: current.id,
+              filename: current.filename,
+              label: current.label,
+              textBubble: current.textBubble,
+              emotionKey: current.emotionKey,
+              engine: config.imageEngine,
+            }),
+          });
 
-        let transparentUrl = rawBase64;
-        if (procRes.ok) {
-          const procData = await procRes.json();
-          transparentUrl = procData.transparentImageUrl;
+          // Handle 45s cooldown from free FLUX tier gracefully
+          if (genRes.status === 429) {
+            const errJson = await genRes.json().catch(() => ({}));
+            const waitSec = errJson.retrySeconds || 45;
+            for (let c = waitSec; c >= 1; c--) {
+              setStickers((prev) =>
+                prev.map((s) =>
+                  s.id === current.id
+                    ? { ...s, status: 'cooldown', cooldownSeconds: c }
+                    : s
+                )
+              );
+              await sleep(1000);
+            }
+            continue; // Retry after countdown
+          }
+
+          if (!genRes.ok) {
+            const errJson = await genRes.json().catch(() => ({}));
+            throw new Error(errJson.error || 'Image generation failed');
+          }
+
+          const genData = await genRes.json();
+          const rawBase64 = genData.imageBase64;
+
+          setStickers((prev) =>
+            prev.map((s) =>
+              s.id === current.id
+                ? { ...s, status: 'processing', rawImageUrl: rawBase64 }
+                : s
+            )
+          );
+
+          // Process with White Stroke & Text Overlay
+          const procRes = await fetch('/api/process-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              imageBase64: rawBase64,
+              type: 'sticker',
+              threshold: 240,
+              strokeThickness: config.whiteStrokeThickness,
+              textOverlay: current.textOverlay,
+            }),
+          });
+
+          let transparentUrl = rawBase64;
+          if (procRes.ok) {
+            const procData = await procRes.json();
+            transparentUrl = procData.transparentImageUrl;
+          }
+
+          setStickers((prev) =>
+            prev.map((s) =>
+              s.id === current.id
+                ? {
+                    ...s,
+                    status: 'ready',
+                    rawImageUrl: rawBase64,
+                    transparentImageUrl: transparentUrl,
+                    modelUsed: genData.modelUsed,
+                  }
+                : s
+            )
+          );
+
+          if (i === 0) {
+            processMainAndTab(rawBase64);
+          }
+          success = true;
+        } catch (err: any) {
+          console.error(`Sticker ${current.id} error:`, err);
+          setStickers((prev) =>
+            prev.map((s) =>
+              s.id === current.id
+                ? { ...s, status: 'error', error: err.message || 'Failed' }
+                : s
+            )
+          );
+          break;
         }
-
-        setStickers((prev) =>
-          prev.map((s) =>
-            s.id === current.id
-              ? {
-                  ...s,
-                  status: 'ready',
-                  rawImageUrl: rawBase64,
-                  transparentImageUrl: transparentUrl,
-                  isFallback: genData.isFallback,
-                  modelUsed: genData.modelUsed,
-                }
-              : s
-          )
-        );
-
-        if (i === 0) {
-          processMainAndTab(rawBase64);
-        }
-      } catch (err: any) {
-        console.error(`Sticker ${current.id} error:`, err);
-        setStickers((prev) =>
-          prev.map((s) =>
-            s.id === current.id
-              ? { ...s, status: 'error', error: err.message || 'Failed' }
-              : s
-          )
-        );
       }
     }
 
@@ -402,6 +427,18 @@ export default function Home() {
           engine: config.imageEngine,
         }),
       });
+
+      if (genRes.status === 429) {
+        const errJson = await genRes.json().catch(() => ({}));
+        const waitSec = errJson.retrySeconds || 45;
+        for (let c = waitSec; c >= 1; c--) {
+          setStickers((prev) =>
+            prev.map((s) => (s.id === id ? { ...s, status: 'cooldown', cooldownSeconds: c } : s))
+          );
+          await sleep(1000);
+        }
+        return handleRegenerateSticker(id); // auto-retry after countdown
+      }
 
       if (!genRes.ok) {
         const errJson = await genRes.json().catch(() => ({}));
