@@ -161,10 +161,16 @@ Return a valid JSON object matching this schema:
 
     const parsed = JSON.parse(responseText);
 
+    const masterAnchor = parsed.masterCharacterDescription || `A cute ${input.concept} in ${styleObj.name} style`;
+
     const stickers: PromptResultItem[] = input.selectedEmotions.map((emotion, idx) => {
       const found = parsed.stickers?.find((s: any) => s.emotionKey === emotion.id || s.id === idx + 1);
       const filename = `${String(idx + 1).padStart(2, '0')}.png`;
       const textVal = found?.textBubble || emotion.defaultText || '';
+      const basePrompt = found?.prompt || `A cute LINE sticker of ${input.concept}, ${emotion.poseDescription || emotion.label}, ${styleObj.promptModifier}, isolated on pure solid white background, die-cut sticker edge, no shadow`;
+      const cohesivePrompt = basePrompt.toLowerCase().includes(masterAnchor.toLowerCase().slice(0, 20))
+        ? basePrompt
+        : `${masterAnchor}. ${basePrompt}`;
 
       return {
         id: idx + 1,
@@ -172,7 +178,7 @@ Return a valid JSON object matching this schema:
         emotionKey: emotion.id,
         label: emotion.label,
         textBubble: textVal,
-        prompt: found?.prompt || `A cute LINE sticker of ${input.concept}, ${emotion.poseDescription || emotion.label}, ${styleObj.promptModifier}, isolated on pure solid white background, die-cut sticker edge, no shadow`,
+        prompt: cohesivePrompt,
         textOverlay: {
           enabled: Boolean(input.includeTextBubbles && textVal),
           text: textVal,
@@ -275,7 +281,7 @@ function generateDeterministicFallback(input: GeneratePromptsInput, styleModifie
 
   const stickers: PromptResultItem[] = input.selectedEmotions.map((emotion, idx) => {
     const filename = `${String(idx + 1).padStart(2, '0')}.png`;
-    const prompt = `A charming LINE sticker of ${input.concept}, ${emotion.poseDescription || emotion.label}, showing joyful expression, ${styleModifier}, isolated on a solid pure white background, crisp sticker borders, no clutter`;
+    const prompt = `${masterDescription}. A charming LINE sticker of ${input.concept}, ${emotion.poseDescription || emotion.label}, showing joyful expression, ${styleModifier}, isolated on a solid pure white background, crisp sticker borders, no clutter`;
     const textVal = emotion.defaultText || emotion.label;
 
     tagsBySticker[filename] = [emotion.id, emotion.label.toLowerCase(), 'cute', 'character'];

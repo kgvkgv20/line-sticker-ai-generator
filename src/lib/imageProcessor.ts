@@ -113,6 +113,7 @@ export async function removeBackgroundAndResize(
       const dilatedAlpha = await sharp(alphaChannel)
         .blur(sigma)
         .threshold(20)
+        .resize(paddedMeta.width, paddedMeta.height)
         .toBuffer();
 
       // Solid white layer with dilated alpha
