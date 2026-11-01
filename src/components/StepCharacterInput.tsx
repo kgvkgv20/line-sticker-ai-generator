@@ -391,6 +391,96 @@ export const StepCharacterInput: React.FC<StepCharacterInputProps> = ({
           </div>
         </div>
 
+        {/* AI Image Engine Switch */}
+        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <label className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                <span>เลือก AI วาดภาพ (Image Generator Engine)</span>
+              </label>
+              <p className="text-xs text-gray-500">
+                เลือกเครื่องยนต์ AI ที่ต้องการใช้วาดภาพสติกเกอร์
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            {/* Free FLUX Engine */}
+            <div
+              onClick={() => onChangeConfig({ imageEngine: 'flux' })}
+              className={`p-4 rounded-2xl border-2 cursor-pointer transition flex flex-col justify-between gap-3 ${
+                config.imageEngine === 'flux'
+                  ? 'border-line bg-line-light/40 shadow-sm ring-1 ring-line/20'
+                  : 'border-gray-200 hover:border-gray-300 bg-white'
+              }`}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
+                    ⚡
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-black text-gray-900">Free FLUX.1 Engine</p>
+                      <span className="text-[10px] font-extrabold bg-emerald-600 text-white px-2 py-0.5 rounded-full">
+                        แนะนำ ฟรี 100%
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-gray-500 mt-0.5">ไม่ต้องมี API Key • ไม่ต้องผูกบัตรเครดิต</p>
+                  </div>
+                </div>
+                <div
+                  className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${
+                    config.imageEngine === 'flux' ? 'bg-line text-white' : 'border border-gray-300'
+                  }`}
+                >
+                  {config.imageEngine === 'flux' && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                </div>
+              </div>
+              <p className="text-xs text-gray-600 leading-relaxed bg-white/70 p-2.5 rounded-xl border border-gray-100">
+                วาดภาพสัตว์เลี้ยงของจริงจาก Prompt ไดคัทขอบขาวโปร่งใส และใส่ข้อความภาษาไทยครบวงจร ใช้งานได้ทันที
+              </p>
+            </div>
+
+            {/* Google AI Studio (Gemini 2.5 Flash Image) */}
+            <div
+              onClick={() => onChangeConfig({ imageEngine: 'gemini' })}
+              className={`p-4 rounded-2xl border-2 cursor-pointer transition flex flex-col justify-between gap-3 ${
+                config.imageEngine === 'gemini'
+                  ? 'border-line bg-line-light/40 shadow-sm ring-1 ring-line/20'
+                  : 'border-gray-200 hover:border-gray-300 bg-white'
+              }`}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm">
+                    🤖
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-black text-gray-900">Google AI Studio</p>
+                      <span className="text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full">
+                        Gemini 2.5 Flash Image
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-gray-500 mt-0.5">ใช้ Google AI Studio API Key ใน .env.local</p>
+                  </div>
+                </div>
+                <div
+                  className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${
+                    config.imageEngine === 'gemini' ? 'bg-line text-white' : 'border border-gray-300'
+                  }`}
+                >
+                  {config.imageEngine === 'gemini' && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                </div>
+              </div>
+              <p className="text-xs text-gray-600 leading-relaxed bg-white/70 p-2.5 rounded-xl border border-gray-100">
+                โมเดลทางการของ Google AI Studio (Nano Banana) ต้องกด "Set up billing" ในหน้า AI Studio เพื่อเปิดโควต้าสร้างภาพ
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Action Button */}
         <div className="pt-4">
           <button

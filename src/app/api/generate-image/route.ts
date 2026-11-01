@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateStickerImage } from '@/lib/gemini';
+import { generateImageWithFlux } from '@/lib/flux';
 import sharp from 'sharp';
 
 export const maxDuration = 60;
@@ -7,38 +8,48 @@ export const maxDuration = 60;
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { prompt, id, filename, label, textBubble, emotionKey } = body;
+    const { prompt, id, filename, label, textBubble, emotionKey, engine = 'flux' } = body;
 
     if (!prompt) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-
-    let imageBase64: string;
+    let imageBase64: string = '';
     let isFallback = false;
     let fallbackNotice = '';
+    let modelUsed = engine === 'flux' ? 'flux-1-schnell' : 'gemini-2.5-flash-image';
 
-    if (!apiKey) {
-      imageBase64 = await generateMockStickerImage(label || 'Sticker', textBubble, emotionKey);
-      isFallback = true;
-      fallbackNotice = 'Preview Mode (No API Key)';
-    } else {
+    if (engine === 'flux') {
+      // 1. Free FLUX.1 Engine (No API Key or Billing needed)
       try {
-        imageBase64 = await generateStickerImage(prompt);
-      } catch (genError: any) {
-        console.warn('AI Image Generation unavailable or quota exhausted, activating smart mock fallback:', genError.message);
+        imageBase64 = await generateImageWithFlux(prompt, id ? id * 1234 : undefined);
+      } catch (fluxError: any) {
+        console.warn('FLUX Engine failed, activating mock fallback:', fluxError.message);
         imageBase64 = await generateMockStickerImage(label || 'Sticker', textBubble, emotionKey);
         isFallback = true;
-        fallbackNotice = genError.message?.includes('QUOTA') || genError.message?.includes('429')
-          ? 'Quota 0/0 RPD in AI Studio Free Tier (Set up billing for live AI art)'
-          : `AI Model Fallback (${genError.message?.slice(0, 45) || 'Unavailable'})`;
+        fallbackNotice = `FLUX Server Busy (${fluxError.message?.slice(0, 40)})`;
+      }
+    } else {
+      // 2. Google AI Studio Gemini 2.5 Flash Image (Requires Billing on AI Studio)
+      const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+
+      if (!apiKey) {
+        imageBase64 = await generateMockStickerImage(label || 'Sticker', textBubble, emotionKey);
+        isFallback = true;
+        fallbackNotice = 'Preview Mode (No Google API Key in .env.local)';
+      } else {
+        try {
+          imageBase64 = await generateStickerImage(prompt);
+        } catch (genError: any) {
+          console.warn('Gemini Flash Image unavailable or quota exhausted, activating smart mock fallback:', genError.message);
+          imageBase64 = await generateMockStickerImage(label || 'Sticker', textBubble, emotionKey);
+          isFallback = true;
+          fallbackNotice = genError.message?.includes('QUOTA') || genError.message?.includes('429')
+            ? 'Quota 0/0 RPD in AI Studio Free Tier (Set up billing for live Google AI)'
+            : `AI Model Fallback (${genError.message?.slice(0, 45) || 'Unavailable'})`;
+        }
       }
     }
-
-    const modelUsed = process.env.IMAGEN_MODEL && !process.env.IMAGEN_MODEL.startsWith('imagen-')
-      ? process.env.IMAGEN_MODEL
-      : 'gemini-2.5-flash-image';
 
     return NextResponse.json({
       id,

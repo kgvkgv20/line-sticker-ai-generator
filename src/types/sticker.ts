@@ -30,6 +30,8 @@ export interface EmotionPreset {
 
 export type ThaiStickerFont = 'Mali' | 'Itim' | 'Mitr' | 'Chonburi' | 'Kanit';
 
+export type ImageEngine = 'flux' | 'gemini';
+
 export interface TextOverlayConfig {
   enabled: boolean;
   text: string;
@@ -59,6 +61,7 @@ export interface StickerItem {
   textOverlay?: TextOverlayConfig;
   modelUsed?: string;
   isFallback?: boolean;
+  imageEngine?: ImageEngine;
 }
 
 export interface LineMarketMetadata {
@@ -87,6 +90,7 @@ export interface CharacterConfig {
   includeTextBubbles: boolean;
   whiteStrokeThickness: 'none' | 'thin' | 'medium' | 'thick'; // 0, 4, 8, 12 px
   packSize: 8 | 16 | 24 | 32 | 40;
+  imageEngine: ImageEngine;
   masterCharacterDescription?: string;
 }
 

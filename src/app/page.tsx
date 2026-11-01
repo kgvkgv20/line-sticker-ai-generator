@@ -31,6 +31,7 @@ export default function Home() {
     includeTextBubbles: true,
     whiteStrokeThickness: 'medium', // Default 7px white die-cut stroke
     packSize: 16,
+    imageEngine: 'flux', // Default to Free FLUX.1 Engine
   });
 
   // Prompt generation results
@@ -162,6 +163,7 @@ export default function Home() {
             label: current.label,
             textBubble: current.textBubble,
             emotionKey: current.emotionKey,
+            engine: config.imageEngine,
           }),
         });
 
@@ -397,6 +399,7 @@ export default function Home() {
           label: target.label,
           textBubble: target.textBubble,
           emotionKey: target.emotionKey,
+          engine: config.imageEngine,
         }),
       });
 
@@ -558,6 +561,7 @@ export default function Home() {
             stickers={stickers}
             characterName={config.concept.slice(0, 30)}
             isGenerating={isGeneratingImages}
+            imageEngine={config.imageEngine}
             whiteStrokeThickness={config.whiteStrokeThickness}
             onChangeStrokeThickness={handleChangeStrokeThickness}
             onRegenerateSticker={handleRegenerateSticker}

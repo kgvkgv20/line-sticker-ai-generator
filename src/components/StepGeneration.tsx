@@ -23,6 +23,7 @@ interface StepGenerationProps {
   stickers: StickerItem[];
   characterName: string;
   isGenerating: boolean;
+  imageEngine?: 'flux' | 'gemini';
   whiteStrokeThickness: 'none' | 'thin' | 'medium' | 'thick';
   onChangeStrokeThickness: (thickness: 'none' | 'thin' | 'medium' | 'thick') => void;
   onRegenerateSticker: (id: number) => void;
@@ -40,6 +41,7 @@ export const StepGeneration: React.FC<StepGenerationProps> = ({
   stickers,
   characterName,
   isGenerating,
+  imageEngine = 'flux',
   whiteStrokeThickness,
   onChangeStrokeThickness,
   onRegenerateSticker,
@@ -93,8 +95,8 @@ export const StepGeneration: React.FC<StepGenerationProps> = ({
             </div>
             <p className="text-xs text-gray-500 mt-1">
               {isGenerating
-                ? `Rendering sticker images with gemini-2.5-flash-image (Nano Banana)... (${completedCount}/${totalCount})`
-                : `All ${totalCount} stickers generated, formatted & ready for LINE Creators Market.`}
+                ? `Rendering sticker images with ${imageEngine === 'flux' ? '⚡ Free FLUX.1 AI Engine' : '🤖 gemini-2.5-flash-image'}... (${completedCount}/${totalCount})`
+                : `All ${totalCount} stickers generated with ${imageEngine === 'flux' ? 'FLUX.1 AI' : 'Gemini 2.5 Flash'}, formatted & ready for LINE Creators Market.`}
             </p>
           </div>
 
