@@ -9,6 +9,7 @@ import { ChatSimulator } from '@/components/ChatSimulator';
 import { LineMarketGuideModal } from '@/components/LineMarketGuideModal';
 import { LineMetadataModal } from '@/components/LineMetadataModal';
 import { TextOverlayEditorModal } from '@/components/TextOverlayEditorModal';
+import { StickerStudioTab } from '@/components/StickerStudioTab';
 import { useLiff } from '@/hooks/useLiff';
 import { CharacterConfig, StickerItem, LineMarketMetadata, TextOverlayConfig } from '@/types/sticker';
 import { EMOTION_PRESETS, PACK_PRESETS } from '@/lib/lineStickerPresets';
@@ -17,6 +18,10 @@ import { ArrowLeft, Sparkles } from 'lucide-react';
 
 export default function Home() {
   const liff = useLiff();
+
+  // Top navigation: AI Generator vs Sticker Studio
+  const [activeTab, setActiveTab] = useState<'ai-generator' | 'studio'>('studio');
+  const [studioChatStickers, setStudioChatStickers] = useState<StickerItem[] | null>(null);
 
   // Step state
   const [currentStep, setCurrentStep] = useState<'input' | 'generation'>('input');
@@ -556,64 +561,79 @@ export default function Home() {
       <Header
         liffState={liff}
         onOpenGuide={() => setIsGuideModalOpen(true)}
+        activeTab={activeTab}
+        onChangeTab={setActiveTab}
       />
 
       {/* Main Container */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 sm:py-8">
-        {/* Step Navigation Bar */}
-        <div className="mb-6 flex items-center justify-between">
-          {currentStep === 'generation' ? (
-            <button
-              onClick={() => setCurrentStep('input')}
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-600 hover:text-line transition px-3 py-1.5 rounded-xl hover:bg-gray-100"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Character Form</span>
-            </button>
-          ) : (
-            <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-              Step 1 of 2: Character Conception
-            </div>
-          )}
-
-          {currentStep === 'generation' && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-line-dark bg-line-light px-3 py-1 rounded-full border border-line/20">
-                Step 2 of 2: Rendering & Customization
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Step Views */}
-        {currentStep === 'input' ? (
-          <StepCharacterInput
-            config={config}
-            onChangeConfig={handleUpdateConfig}
-            onSubmit={handleGeneratePrompts}
-            isLoading={isGeneratingPrompts}
-          />
-        ) : (
-          <StepGeneration
-            stickers={stickers}
-            characterName={config.concept.slice(0, 30)}
-            isGenerating={isGeneratingImages}
-            imageEngine={config.imageEngine}
-            whiteStrokeThickness={config.whiteStrokeThickness}
-            onChangeStrokeThickness={handleChangeStrokeThickness}
-            onRegenerateSticker={handleRegenerateSticker}
-            onBatchProcessBackgrounds={handleBatchProcessBackgrounds}
-            onDownloadZip={handleDownloadZip}
-            onOpenChatSimulator={(stk) => {
-              setChatInitialSticker(stk);
+        {activeTab === 'studio' ? (
+          <StickerStudioTab
+            onOpenChatSimulator={(stks) => {
+              setStudioChatStickers(stks);
+              setChatInitialSticker(stks[0]);
               setIsChatSimulatorOpen(true);
             }}
             onOpenGuide={() => setIsGuideModalOpen(true)}
-            onOpenMetadataModal={() => setIsMetadataModalOpen(true)}
-            onEditText={(stk) => setEditingTextSticker(stk)}
-            mainImageBase64={mainImageBase64}
-            tabImageBase64={tabImageBase64}
           />
+        ) : (
+          <>
+            {/* Step Navigation Bar */}
+            <div className="mb-6 flex items-center justify-between">
+              {currentStep === 'generation' ? (
+                <button
+                  onClick={() => setCurrentStep('input')}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-600 hover:text-line transition px-3 py-1.5 rounded-xl hover:bg-gray-100"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Back to Character Form</span>
+                </button>
+              ) : (
+                <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                  Step 1 of 2: Character Conception
+                </div>
+              )}
+
+              {currentStep === 'generation' && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-line-dark bg-line-light px-3 py-1 rounded-full border border-line/20">
+                    Step 2 of 2: Rendering & Customization
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Step Views */}
+            {currentStep === 'input' ? (
+              <StepCharacterInput
+                config={config}
+                onChangeConfig={handleUpdateConfig}
+                onSubmit={handleGeneratePrompts}
+                isLoading={isGeneratingPrompts}
+              />
+            ) : (
+              <StepGeneration
+                stickers={stickers}
+                characterName={config.concept.slice(0, 30)}
+                isGenerating={isGeneratingImages}
+                imageEngine={config.imageEngine}
+                whiteStrokeThickness={config.whiteStrokeThickness}
+                onChangeStrokeThickness={handleChangeStrokeThickness}
+                onRegenerateSticker={handleRegenerateSticker}
+                onBatchProcessBackgrounds={handleBatchProcessBackgrounds}
+                onDownloadZip={handleDownloadZip}
+                onOpenChatSimulator={(stk) => {
+                  setChatInitialSticker(stk);
+                  setIsChatSimulatorOpen(true);
+                }}
+                onOpenGuide={() => setIsGuideModalOpen(true)}
+                onOpenMetadataModal={() => setIsMetadataModalOpen(true)}
+                onEditText={(stk) => setEditingTextSticker(stk)}
+                mainImageBase64={mainImageBase64}
+                tabImageBase64={tabImageBase64}
+              />
+            )}
+          </>
         )}
       </main>
 
@@ -662,9 +682,13 @@ export default function Home() {
       <ChatSimulator
         isOpen={isChatSimulatorOpen}
         onClose={() => setIsChatSimulatorOpen(false)}
-        stickers={stickers}
+        stickers={
+          activeTab === 'studio' && studioChatStickers && studioChatStickers.length > 0
+            ? studioChatStickers
+            : stickers
+        }
         initialSticker={chatInitialSticker}
-        characterName={config.concept.slice(0, 20)}
+        characterName={activeTab === 'studio' ? 'Sticker Studio' : config.concept.slice(0, 20)}
       />
 
       {/* LINE Creators Market Submission Guide Modal */}

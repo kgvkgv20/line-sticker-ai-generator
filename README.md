@@ -1,99 +1,110 @@
-# LINE Sticker AI Generator (LINE LIFF App) 🎨🤖
+# LINE Sticker AI Generator & Sticker Studio (LINE LIFF App) 🎨🤖✂️
 
-A full-stack web application integrated as a **LINE LIFF (LINE Front-end Framework)** app that creates complete, consistent sets of LINE Stickers ready for submission to the **LINE Creators Market**.
-
-Powered by **Google AI Studio (Gemini & Imagen 3)**, this app takes a character concept or reference photo, designs a unified character anchor, generates 8–16 expressive sticker prompts, renders the illustrations, automatically removes solid backgrounds to produce transparent PNGs, resizes them according to official LINE specifications, and bundles them into a submission-ready `.zip` package.
+A comprehensive, production-ready web application integrated as a **LINE LIFF (LINE Front-end Framework)** app for creating, die-cutting, formatting, and packaging ready-to-sell LINE Sticker packs compliant with all official **LINE Creators Market** specifications.
 
 ---
 
-## 🌟 Key Features
+## 🌟 Two Powerful Modes in One App
 
-1. **LINE LIFF SDK Integration (`@line/liff`)**
-   - Runs natively inside the LINE mobile app (iOS / Android) or in any web browser.
-   - Automatic user authentication, fetching profile avatar & display name.
-   - Fallback Sandbox / Browser Demo mode when accessed outside LINE or prior to LIFF ID configuration.
-   - Built-in LINE Share Target Picker (`liff.shareTargetPicker`) to share generated stickers directly to LINE chat rooms.
+### 1. ✂️ Sticker Studio (ตัดพื้นหลัง & จัดเตรียมขาย) — **NEW**
+Designed for creators, illustrators, and artists who already have existing drawings or stickers (e.g. artwork on white background with faint drop shadows or text).
+- **High-Precision BFS Boundary Flood-Fill:** Removes the outer solid white background and faint drop shadows 100% cleanly without encroaching on or deleting the white die-cut border, typography, or character artwork.
+- **Lanczos3 High-Fidelity Resampling:** Sharp, crystal-clear downsampling preserving fine line work and details.
+- **Automatic LINE Creators Market Compliance:**
+  - Auto-centers and constrains sticker dimensions to max **370 × 320 px** (always even pixel numbers).
+  - Guarantees minimum **10px safe transparent margin** on all sides.
+  - Generates official Store Cover **`main.png` (240 × 240 px)** and Chat Keyboard **`tab.png` (96 × 74 px)** automatically.
+- **Interactive Inspection Grid:**
+  - Split toggle between transparent cutout (checkerboard background) and original image.
+  - Live dimension, file size, and margin compliance badges.
+  - On-card controls to select `main.png`, `tab.png`, reorder, or delete.
+- **Otter Sample Pack Included:** 1-click button to load sample otter stickers ("ปั่นงานอยู่", "สาธุ", "กำลังไป!") to test the studio workflow instantly.
+- **One-Click Package Export:** Generates `line_sticker_pack.zip` with numbered PNGs (`01.png` - `NN.png`), `main.png`, `tab.png`, `line_creators_metadata.json`, and `LINE_SUBMISSION_INFO.txt` (ready to copy-paste into [creator.line.me](https://creator.line.me/)).
 
-2. **Google AI Studio Prompt Engineering (Gemini)**
-   - Character Visual Consistency Anchor: Analyzes character concepts or uploaded reference images (multimodal) to freeze visual traits (fur/skin color, attire, eye shape, signature accessories).
-   - Multi-Expression Pack Generation: Automatically designs distinct, dynamic action poses (e.g., Hello, Thank You, OK, Haha, Crying, Love, Shocked, Sleepy, Cheering, Sorry, Bye, Angry).
-   - Multi-Language Sticker Text: Supports English, Thai (ไทย), Japanese (日本語), or pure character illustrations without text banners.
+### 2. 🤖 AI Sticker Generator (สร้างสติกเกอร์จากไอเดีย)
+Generates complete, stylistically consistent character sticker sets from text prompts, concepts, or reference photos.
+- **Dual AI Engine Architecture:**
+  - **Free FLUX.1 Engine (Pollinations):** 100% free, requires no API key and no credit card. Includes smart client-side countdown timer and auto-retry queue when throttled by server cooldown limits.
+  - **Google AI Studio (Gemini 2.5 Flash Image / Imagen 3):** High-speed, high-quality generation using Google AI credentials.
+- **Visual Consistency Anchor:** Freezes character features (fur, eyes, clothing, accessories) across all sticker poses.
+- **Smart Typography & Text Overlay:** Custom Thai and English font styling, outline strokes, and positioning.
+- **Interactive LINE Chat Simulator:** Test sending stickers in an authentic LINE chat room with Light/Dark background toggle and read receipts before downloading.
 
-3. **High-Fidelity AI Image Generation (Google Imagen 3)**
-   - Renders crisp sticker artwork on isolated solid backgrounds using Google's state-of-the-art `imagen-3.0-generate-002`.
-   - Supports art styles: *Kawaii Chibi*, *3D Cute Toy / Clay*, *Anime & Manga*, *16-bit Pixel Art*, *Soft Watercolor*, and *Pop-Art Comic*.
+---
 
-4. **Background Removal & LINE Specs Compliance (Sharp Engine)**
-   - Automated server-side chroma keying / alpha matte generation with anti-aliased edge smoothing.
-   - Auto-trims transparent boundaries, preserves aspect ratios, adds recommended ~10px transparent padding, and composites onto exact LINE dimensions:
-     - **Stickers (`01.png` – `08.png`)**: Max 370 × 320 px (even pixel dimensions, transparent PNG).
-     - **Main Cover (`main.png`)**: 240 × 240 px (LINE Store package thumbnail).
-     - **Chat Tab Icon (`tab.png`)**: 96 × 74 px (chat keyboard selector).
+## 📐 LINE Creators Market Specifications Handled
 
-5. **Realistic LINE Mobile Chat Simulator**
-   - Test generated stickers in an authentic LINE chat room interface (#849EB0 background, speech bubbles, timestamps, and "Read" receipts) before exporting.
+Every file exported from the application strictly complies with [LINE Creators Market Guidelines](https://creator.line.me/en/guideline/sticker/):
 
-6. **One-Click LINE Creators Market ZIP Export (`jszip`)**
-   - Automatically compiles all formatted stickers, `main.png`, `tab.png`, and a submission manifest checklist into a single downloadable `.zip` file ready for instant upload to [LINE Creators Market](https://creator.line.me/).
+| File Name | Dimensions | Requirement Details | Status |
+| :--- | :--- | :--- | :---: |
+| `01.png` – `40.png` | Max 370 × 320 px | Even pixel dimensions, transparent PNG, ≥10px padding | ✅ 100% Auto |
+| `main.png` | 240 × 240 px | Main package cover in LINE Sticker Store | ✅ 100% Auto |
+| `tab.png` | 96 × 74 px | Chat room keyboard selector icon | ✅ 100% Auto |
+| Format | PNG (RGBA) | RGB color mode, alpha channel, < 1MB per image | ✅ 100% Auto |
+| Pack Size | 8, 16, 24, 32, 40 | Standard LINE pack counts supported | ✅ Supported |
 
 ---
 
 ## 🏗️ Tech Stack
 
-- **Framework:** [Next.js 14](https://nextjs.org/) (App Router, Route Handlers, Server Actions)
+- **Framework:** [Next.js 14](https://nextjs.org/) (App Router, Route Handlers)
 - **Frontend:** React 18, Tailwind CSS, Lucide React Icons
-- **LINE Integration:** [`@line/liff`](https://www.npmjs.com/package/@line/liff) (v2.24+)
-- **AI Models (Google AI Studio):**
-  - Text & Prompt Expansion: [`@google/genai`](https://www.npmjs.com/package/@google/genai) with `gemini-2.5-flash` / `gemini-1.5-flash`
-  - Image Generation: `imagen-3.0-generate-002`
-- **Image Processing:** [`sharp`](https://sharp.pixelplumbing.com/) (high-speed libvips image transformation)
+- **Image Processing:** [`sharp`](https://sharp.pixelplumbing.com/) (Lanczos3 resampling, boundary flood-fill, contour dilation)
+- **LINE LIFF SDK:** [`@line/liff`](https://www.npmjs.com/package/@line/liff) (v2.24+)
+- **AI Models:**
+  - FLUX.1 Schnell via Pollinations API (Free tier)
+  - Google Gemini 2.5 Flash & Imagen 3 via `@google/genai`
 - **Archive Generation:** [`jszip`](https://stuk.github.io/jszip/) & [`file-saver`](https://www.npmjs.com/package/file-saver)
+- **Deployment:** [Vercel](https://vercel.com/) with `vercel.json` preset
 
 ---
 
-## 📁 Project Folder Structure
+## 📁 Project Structure
 
 ```
 line-sticker-ai-generator/
+├── public/
+│   └── samples/                  # Sample otter stickers for instant 1-click test
+│       ├── otter_01_work.jpg     # "ปั่นงานอยู่"
+│       ├── otter_02_pray.jpg     # "สาธุ"
+│       └── otter_03_run.jpg      # "กำลังไป!"
 ├── src/
 │   ├── app/
 │   │   ├── api/
-│   │   │   ├── generate-prompts/     # Gemini character & multi-emotion prompt designer
-│   │   │   │   └── route.ts
-│   │   │   ├── generate-image/       # Imagen 3 text-to-image generator
-│   │   │   │   └── route.ts
-│   │   │   ├── process-image/        # Sharp transparent background & LINE resizing
-│   │   │   │   └── route.ts
-│   │   │   └── package-zip/          # Server-side ZIP fallback
-│   │   │       └── route.ts
-│   │   ├── globals.css               # Tailwind CSS & custom styles
-│   │   ├── layout.tsx                # Mobile-responsive root layout
-│   │   └── page.tsx                  # Main LIFF single-page wizard
+│   │   │   ├── clean-and-format/ # High-precision BFS die-cut & LINE sizing API
+│   │   │   ├── generate-image/   # AI Image engine (FLUX.1 free / Gemini AI Studio)
+│   │   │   ├── generate-prompts/ # Gemini character prompt expansion & metadata
+│   │   │   ├── package-zip/      # Server-side ZIP fallback
+│   │   │   └── process-image/    # Canvas compositing & padding
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx              # Main view with Tab switcher
 │   ├── components/
-│   │   ├── ChatSimulator.tsx         # Interactive LINE mobile chat preview room
-│   │   ├── Header.tsx                # App navigation & LIFF user status pill
-│   │   ├── LineMarketGuideModal.tsx  # LINE Creators Market submission rules
-│   │   ├── PromptReviewModal.tsx     # Gemini prompt inspection & editing modal
-│   │   ├── StepCharacterInput.tsx    # Character concept, styles & emotion selector
-│   │   ├── StepGeneration.tsx        # Generation progress, cards grid & export controls
-│   │   └── StickerCard.tsx           # Individual sticker card with transparent toggle
+│   │   ├── ChatSimulator.tsx     # Realistic LINE chat room simulator
+│   │   ├── Header.tsx            # Navigation, tab switcher & LIFF status
+│   │   ├── LineMarketGuideModal.tsx # Submission guidelines modal
+│   │   ├── LineMetadataModal.tsx # Copy-paste submission metadata modal
+│   │   ├── PromptReviewModal.tsx # AI prompt inspector
+│   │   ├── StepCharacterInput.tsx # AI character concept form
+│   │   ├── StepGeneration.tsx    # AI generation grid & controls
+│   │   ├── StickerCard.tsx       # Individual AI sticker card with cooldown timer
+│   │   ├── StickerStudioTab.tsx  # Importer, batch die-cut & LINE packager
+│   │   └── TextOverlayEditorModal.tsx # Thai typography editor
 │   ├── hooks/
-│   │   └── useLiff.ts                # React hook for LIFF initialization and state
+│   │   └── useLiff.ts            # LINE LIFF initialization hook
 │   ├── lib/
-│   │   ├── gemini.ts                 # Google GenAI SDK client (Gemini & Imagen)
-│   │   ├── imageProcessor.ts         # Sharp background removal & canvas compositing
-│   │   ├── liff.ts                   # LINE Front-end Framework helper & fallbacks
-│   │   ├── lineStickerPresets.ts     # Art styles, emotion lists & LINE guidelines
-│   │   └── zipGenerator.ts           # JSZip packaging for Creators Market
+│   │   ├── dieCutExtractor.ts    # BFS flood-fill background & shadow removal
+│   │   ├── flux.ts               # FLUX.1 engine with 429 cooldown detection
+│   │   ├── gemini.ts             # Google GenAI SDK client
+│   │   ├── imageProcessor.ts     # Sharp background removal & resizing
+│   │   ├── lineStickerPresets.ts # Art styles, emotions & LINE guidelines
+│   │   └── zipGenerator.ts       # Ready-to-sell ZIP package builder
 │   └── types/
-│       └── sticker.ts                # TypeScript interfaces & data types
-├── .env.example                      # Environment variables template
-├── next.config.mjs                   # Next.js configuration
-├── package.json                      # Project dependencies & scripts
-├── postcss.config.js                 # PostCSS setup
-├── tailwind.config.js                # Tailwind styling with LINE theme palette
-├── tsconfig.json                     # TypeScript compiler configuration
-└── README.md                         # Documentation
+│       └── sticker.ts            # TypeScript interfaces
+├── vercel.json                   # Vercel deployment configuration
+├── package.json
+└── README.md
 ```
 
 ---
@@ -103,39 +114,28 @@ line-sticker-ai-generator/
 ### 1. Clone & Install Dependencies
 
 ```bash
-# Clone the repository
-git clone <repository_url>
+git clone https://github.com/kgvkgv20/line-sticker-ai-generator.git
 cd line-sticker-ai-generator
-
-# Install npm dependencies
 npm install
 ```
 
 ### 2. Configure Environment Variables
 
-Copy the example environment file:
-
 ```bash
 cp .env.example .env.local
 ```
 
-Open `.env.local` and configure your credentials:
+Edit `.env.local`:
 
 ```env
-# 1. Google AI Studio API Key (Required)
-# Generate your key at https://aistudio.google.com/
+# Optional: Required only if using Google AI Studio mode (not needed for Free FLUX mode or Sticker Studio)
 GEMINI_API_KEY="AIzaSy..."
 
-# 2. LINE LIFF ID (Required for LINE integration)
-# Create a LIFF app at https://developers.line.biz/
+# Optional: Required for native in-app LINE LIFF features
 NEXT_PUBLIC_LIFF_ID="2000000000-XXXXXXXX"
-
-# Optional Model Configuration
-IMAGEN_MODEL="imagen-3.0-generate-002"
-GEMINI_MODEL="gemini-2.5-flash"
 ```
 
-> **Note on Sandbox Mode:** If you launch the app without `NEXT_PUBLIC_LIFF_ID` or `GEMINI_API_KEY`, the application automatically activates **Browser Sandbox Mode** with high-fidelity mock assets, allowing you to test the complete user flow, background removal, chat simulator, and ZIP downloads immediately!
+> **Note:** The app works out of the box in **Browser Sandbox Mode** even with an empty `.env.local`! You can immediately use the **Sticker Studio** to import, die-cut, and package your stickers, or generate stickers using the **Free FLUX.1 Engine**.
 
 ### 3. Run the Development Server
 
@@ -143,64 +143,54 @@ GEMINI_MODEL="gemini-2.5-flash"
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## ☁️ Deploying to Vercel
+
+1. Push your repository to GitHub.
+2. In [Vercel Dashboard](https://vercel.com/new), import your repository:
+   - **Framework Preset:** Next.js
+   - **Root Directory:** `./`
+   - **Build Command:** `npm run build`
+   - **Output Directory:** `.next`
+3. Add Environment Variables in Vercel project settings:
+   - `NEXT_PUBLIC_LIFF_ID` (your LINE LIFF ID)
+   - `GEMINI_API_KEY` (if using Google AI Studio)
+4. Click **Deploy**. Vercel will output a live HTTPS URL (e.g. `https://your-app.vercel.app`).
 
 ---
 
 ## 📱 Setting Up LINE LIFF in LINE Developers Console
 
-To deploy and test your app inside LINE:
+To use the app directly inside LINE on iOS / Android:
 
-1. **Go to LINE Developers Console:**
-   - Visit [https://developers.line.biz/](https://developers.line.biz/) and log in with your LINE account.
-2. **Create a Provider:**
-   - Click **Create a new provider** (e.g., "My Sticker Studio").
-3. **Create a LINE Login Channel:**
-   - Under your provider, click **Create a new channel** &gt; **LINE Login**.
-   - Channel type: `LINE Login`. Fill in App name, description, and category.
-4. **Add a LIFF App:**
-   - Go to the **LIFF** tab in your LINE Login channel.
-   - Click **Add**.
-   - **LIFF app name:** `LINE Sticker AI Generator`
-   - **Size:** `Full` (Recommended for best mobile canvas experience) or `Tall`.
-   - **Endpoint URL:** Your public HTTPS URL (e.g. `https://your-domain.vercel.app` or an ngrok tunnel `https://xxxx.ngrok-free.app` during local development).
-   - **Scopes:** Check `profile`, `openid`, and `chat_message.write` (to enable sticker sharing).
-   - **Bot link feature:** Normal (or On).
-5. **Copy the LIFF ID:**
-   - Once saved, copy the **LIFF ID** (e.g. `2000123456-AbCdEfGh`) and paste it as `NEXT_PUBLIC_LIFF_ID` in your `.env.local`.
-6. **Open Inside LINE:**
-   - Open the **LIFF URL** (`https://liff.line.me/2000123456-AbCdEfGh`) directly on your mobile device inside LINE to test the native in-app experience!
+1. Go to [LINE Developers Console](https://developers.line.biz/) and log in with your LINE account.
+2. Create a **Provider** (e.g. "Sticker Studio").
+3. Create a **LINE Login Channel** under the provider.
+4. Go to the **LIFF** tab in your channel and click **Add**:
+   - **LIFF app name:** `LINE Sticker AI & Studio`
+   - **Size:** `Full`
+   - **Endpoint URL:** Your Vercel URL (`https://your-app.vercel.app`)
+   - **Scopes:** Check `profile`, `openid`, and `chat_message.write`
+5. Copy the generated **LIFF ID** (e.g. `2000123456-AbCdEfGh`) and set it as `NEXT_PUBLIC_LIFF_ID` in your Vercel settings and `.env.local`.
+6. Share or open the URL `https://liff.line.me/2000123456-AbCdEfGh` in LINE to run natively inside the chat app!
 
 ---
 
-## 🎨 LINE Creators Market Specifications Handled
+## 📦 How to Submit Exported ZIP to LINE Creators Market
 
-This application adheres to all technical guidelines established by [LINE Creators Market](https://creator.line.me/en/guideline/sticker/):
-
-| File Name | Specification | Requirement Details | Handled by App |
-| :--- | :--- | :--- | :---: |
-| `01.png` – `08.png` | Max 370 × 320 px | Even pixel dimensions, transparent PNG, ~10px padding | ✅ Auto |
-| `main.png` | 240 × 240 px | Main cover image for LINE Sticker Store | ✅ Auto |
-| `tab.png` | 96 × 74 px | Chat room tab bar thumbnail icon | ✅ Auto |
-| Format | PNG (RGBA) | 72 dpi or higher, RGB color mode, < 1MB each | ✅ Auto |
-
-### Submission Steps to LINE Creators Market:
-1. Log in to [creator.line.me](https://creator.line.me/) with your LINE credentials.
-2. Click **New Submission** &gt; **Sticker**.
-3. Fill in the sticker package title and description.
-4. Go to **Sticker Images** &gt; Click **Upload ZIP** & select the `.zip` file generated by this application.
-5. Set your price tier (e.g. 50 Coins / 35 THB / $0.99) and submit for review.
-
----
-
-## 🧪 Testing the Build
-
-You can verify the production Next.js build locally:
-
-```bash
-npm run build
-npm run start
-```
+1. Download the ZIP file from the app (via **ดาวน์โหลด ZIP พร้อมส่งขาย** in Sticker Studio or AI Generator).
+2. Go to [https://creator.line.me/](https://creator.line.me/) and sign in with your LINE account.
+3. Click **New Submission** > **Sticker**.
+4. Open `LINE_SUBMISSION_INFO.txt` inside your ZIP and copy-paste:
+   - English Title & Description (Required)
+   - Thai Title & Description
+   - Japanese Title & Description
+5. Under **Sticker Images**, click **Upload ZIP file** and upload your downloaded `.zip`.
+6. Review the images in the LINE preview.
+7. Set your price tier (e.g. 50 Coins / 35 THB / $0.99) and click **Request Review**!
 
 ---
 
