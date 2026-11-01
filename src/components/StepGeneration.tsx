@@ -61,6 +61,7 @@ export const StepGeneration: React.FC<StepGenerationProps> = ({
   const totalCount = stickers.length;
   const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
   const allCompleted = completedCount === totalCount && totalCount > 0;
+  const hasFallbackSticker = stickers.some((s) => s.isFallback);
 
   const handleShare = async () => {
     const firstReady = stickers.find((s) => s.transparentImageUrl || s.rawImageUrl);
@@ -92,7 +93,7 @@ export const StepGeneration: React.FC<StepGenerationProps> = ({
             </div>
             <p className="text-xs text-gray-500 mt-1">
               {isGenerating
-                ? `Rendering sticker images with Imagen 3 & removing backgrounds... (${completedCount}/${totalCount})`
+                ? `Rendering sticker images with gemini-2.5-flash-image (Nano Banana)... (${completedCount}/${totalCount})`
                 : `All ${totalCount} stickers generated, formatted & ready for LINE Creators Market.`}
             </p>
           </div>
@@ -150,6 +151,23 @@ export const StepGeneration: React.FC<StepGenerationProps> = ({
             />
           </div>
         </div>
+
+        {hasFallbackSticker && (
+          <div className="bg-amber-50/90 border border-amber-200/90 rounded-2xl p-4 text-xs text-amber-900 flex items-start gap-3">
+            <Sparkles className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="font-bold flex items-center gap-2">
+                <span>เชื่อมต่อโมเดล:</span>
+                <span className="font-mono text-[11px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded border border-amber-300 font-semibold">
+                  gemini-2.5-flash-image (Nano Banana)
+                </span>
+              </p>
+              <p className="text-amber-800 leading-relaxed">
+                ระบบได้ส่งคำสั่งไปยัง <strong>gemini-2.5-flash-image</strong> ผ่าน Google AI Studio Interactions เรียบร้อยแล้ว แต่เนื่องจากบัญชี Free Tier กำหนดโควต้าสร้างภาพเป็น <code>0/0 RPD</code> ระบบจึงสลับมาใช้ภาพตัวอย่างพร้อมขอบขาวไดคัทและข้อความไทยให้คุณทดสอบฟังก์ชันได้ครบ 100% หากต้องการให้ AI วาดภาพจริง ให้คลิกปุ่ม <strong>"Set up billing"</strong> ที่มุมบนซ้ายในหน้า <a href="https://aistudio.google.com/" target="_blank" rel="noreferrer" className="underline font-bold text-amber-950 hover:text-black">Google AI Studio</a> ครับ
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* View & Tuning Toolbar */}
         <div className="pt-3 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3 text-xs">

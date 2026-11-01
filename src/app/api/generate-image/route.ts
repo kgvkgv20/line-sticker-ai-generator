@@ -36,6 +36,10 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const modelUsed = process.env.IMAGEN_MODEL && !process.env.IMAGEN_MODEL.startsWith('imagen-')
+      ? process.env.IMAGEN_MODEL
+      : 'gemini-2.5-flash-image';
+
     return NextResponse.json({
       id,
       filename,
@@ -43,6 +47,7 @@ export async function POST(req: NextRequest) {
       imageBase64,
       isFallback,
       fallbackNotice,
+      modelUsed,
     });
   } catch (error: any) {
     console.error('API Error in /api/generate-image:', error);

@@ -57,6 +57,8 @@ export interface StickerItem {
   width?: number;
   height?: number;
   textOverlay?: TextOverlayConfig;
+  modelUsed?: string;
+  isFallback?: boolean;
 }
 
 export interface LineMarketMetadata {

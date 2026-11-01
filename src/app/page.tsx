@@ -208,6 +208,8 @@ export default function Home() {
                   status: 'ready',
                   rawImageUrl: rawBase64,
                   transparentImageUrl: transparentUrl,
+                  isFallback: genData.isFallback,
+                  modelUsed: genData.modelUsed,
                 }
               : s
           )
@@ -436,6 +438,8 @@ export default function Home() {
                 status: 'ready',
                 rawImageUrl: rawBase64,
                 transparentImageUrl: transparentUrl,
+                isFallback: genData.isFallback,
+                modelUsed: genData.modelUsed,
               }
             : s
         )

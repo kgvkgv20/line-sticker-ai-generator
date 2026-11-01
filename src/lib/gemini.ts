@@ -215,8 +215,8 @@ Return a valid JSON object matching this schema:
 
 /**
  * Step 2: Generate an individual sticker image using Google AI Studio
- * Uses interactions.create with Nano Banana models (gemini-2.5-flash-image, gemini-3.1-flash-image)
- * with automatic fallback for different Gemini API configurations.
+ * Uses the official Google AI Studio image model:
+ * 'gemini-2.5-flash-image' (Nano Banana) via the Interactions API endpoint
  */
 export async function generateStickerImage(prompt: string): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
@@ -224,64 +224,49 @@ export async function generateStickerImage(prompt: string): Promise<string> {
     throw new Error('GEMINI_API_KEY is required to generate images.');
   }
 
-  const ai = getGenAIClient();
   const enhancedPrompt = `${prompt}, isolated sticker illustration on pure solid white background (#FFFFFF), centered, die-cut sticker border, no drop shadow, clean sharp edges, high resolution`;
 
-  // 1. Try modern Google AI Studio image models (Nano Banana / Gemini Flash Image)
-  const envModel = process.env.IMAGEN_MODEL;
-  const safeEnvModel = envModel && !envModel.startsWith('imagen-') ? envModel : null;
-  const candidateModels = [
-    safeEnvModel,
-    'gemini-2.5-flash-image',
-    'gemini-3.1-flash-image',
-    'gemini-nano-banana-2.1',
-  ].filter(Boolean) as string[];
+  const model = process.env.IMAGEN_MODEL && !process.env.IMAGEN_MODEL.startsWith('imagen-')
+    ? process.env.IMAGEN_MODEL
+    : 'gemini-2.5-flash-image';
 
-  let lastError: any = null;
+  console.log(`[Google AI Studio] Generating image with model: ${model}`);
 
-  for (const model of candidateModels) {
-    try {
-      const res = await ai.interactions.create({
-        model: model,
-        input: enhancedPrompt,
-      });
+  const url = `https://generativelanguage.googleapis.com/v1beta/interactions?key=${apiKey}`;
 
-      const b64 = res?.output_image?.data;
-      if (b64) {
-        return `data:image/png;base64,${b64}`;
-      }
-    } catch (err: any) {
-      lastError = err;
-      const msg = err.message || '';
-      if (
-        err.status === 429 ||
-        msg.includes('429') ||
-        msg.includes('Quota exceeded') ||
-        msg.includes('quota') ||
-        msg.includes('RESOURCE_EXHAUSTED')
-      ) {
-        throw new Error('QUOTA_EXCEEDED: ' + msg);
-      }
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: model,
+      input: enhancedPrompt,
+    }),
+  });
+
+  const resJson = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const errorMsg = resJson?.error?.message || `HTTP ${response.status} ${response.statusText}`;
+    console.warn(`[Google AI Studio] ${model} response status ${response.status}:`, errorMsg);
+    if (
+      response.status === 429 ||
+      errorMsg.includes('limit: 0') ||
+      errorMsg.includes('Rate limit exceeded') ||
+      errorMsg.includes('Quota exceeded')
+    ) {
+      throw new Error(`QUOTA_EXCEEDED: ${errorMsg}`);
     }
+    throw new Error(`API_ERROR: ${errorMsg}`);
   }
 
-  // 2. Fallback to generateContent
-  try {
-    const res = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
-      contents: enhancedPrompt,
-    });
-    const parts = res?.candidates?.[0]?.content?.parts || [];
-    for (const part of parts) {
-      if (part.inlineData?.data) {
-        return `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`;
-      }
-    }
-  } catch (err: any) {
-    lastError = err;
+  const b64 = resJson?.output_image?.data;
+  if (b64) {
+    return `data:image/png;base64,${b64}`;
   }
 
-  throw new Error(lastError?.message || 'Image generation failed');
+  throw new Error(`No output image returned by model ${model}`);
 }
 
 function generateDeterministicFallback(input: GeneratePromptsInput, styleModifier: string): GeneratePromptsResponse {
