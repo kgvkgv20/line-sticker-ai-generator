@@ -16,21 +16,23 @@ export async function POST(req: NextRequest) {
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
 
     let imageBase64: string;
+    let isFallback = false;
+    let fallbackNotice = '';
 
     if (!apiKey) {
       imageBase64 = await generateMockStickerImage(label || 'Sticker', textBubble, emotionKey);
+      isFallback = true;
+      fallbackNotice = 'Preview Mode (No API Key)';
     } else {
       try {
         imageBase64 = await generateStickerImage(prompt);
       } catch (genError: any) {
-        console.warn('Imagen API generation failed, falling back to mock sticker:', genError.message);
-        return NextResponse.json(
-          { 
-            error: genError.message || 'Image generation failed',
-            details: 'Check your Google AI Studio API key and quota in .env.local'
-          },
-          { status: 502 }
-        );
+        console.warn('AI Image Generation unavailable or quota exhausted, activating smart mock fallback:', genError.message);
+        imageBase64 = await generateMockStickerImage(label || 'Sticker', textBubble, emotionKey);
+        isFallback = true;
+        fallbackNotice = genError.message?.includes('QUOTA') || genError.message?.includes('429')
+          ? 'Quota 0/0 RPD in AI Studio Free Tier (Set up billing for live AI art)'
+          : `AI Model Fallback (${genError.message?.slice(0, 45) || 'Unavailable'})`;
       }
     }
 
@@ -39,6 +41,8 @@ export async function POST(req: NextRequest) {
       filename,
       label,
       imageBase64,
+      isFallback,
+      fallbackNotice,
     });
   } catch (error: any) {
     console.error('API Error in /api/generate-image:', error);
